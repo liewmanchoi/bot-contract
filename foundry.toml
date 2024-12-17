@@ -7,6 +7,7 @@ solc_version = "0.8.28"
 [dependencies]
 forge-std = "1.9.4"
 solmate = "6.8.0"
+"@openzeppelin-contracts" = "5.2.0-rc.0"
 
 [profile.config.ftm]
 single_line_statement_blocks = 'multi'
