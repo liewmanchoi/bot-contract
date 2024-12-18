@@ -1,3 +1,4 @@
 @openzeppelin/=dependencies/@openzeppelin-contracts-5.2.0-rc.0/
 forge-std/=dependencies/forge-std-1.9.4/src/
 solmate/=dependencies/solmate-6.8.0/src/
+@balancer-labs/v2-interfaces=node_modules/@balancer-labs/v2-interfaces/

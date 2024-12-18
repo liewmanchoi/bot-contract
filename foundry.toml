@@ -1,8 +1,14 @@
 [profile.default]
 src = "src"
+test = "test"
 out = "out"
-libs = ["lib", "dependencies"]
+cache_path = "cache"
+libs = ["lib", "dependencies", "node_modules"]
 solc_version = "0.8.28"
+# 启用优化器
+optimizer = true
+# 优化器的运行次数
+optimizer_runs = 9999
 
 [dependencies]
 forge-std = "1.9.4"
