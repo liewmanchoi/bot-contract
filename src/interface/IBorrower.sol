@@ -2,9 +2,10 @@
 pragma solidity ^0.8.28;
 pragma abicoder v2;
 
-import {IERC20} from "@openzeppelin-contracts-5.2.0-rc.0/token/ERC20/IERC20.sol";
+import {IERC20} from "@openzeppelin/token/ERC20/IERC20.sol";
 
 interface IBorrower {
-    function makeFlashloan(uint256[] calldata amounts, bytes calldata callback) external;
-    function onFlashloan(uint256[] calldata amounts, bytes calldata callback) external;
+    function makeFlashloan(IERC20[] calldata tokens, uint256[] calldata amounts, bytes calldata data) external;
+    // 回调函数注意权限控制
+    function onFlashloan(IERC20[] calldata tokens, uint256[] calldata amounts, bytes calldata data) external;
 }
