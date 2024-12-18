@@ -29,6 +29,7 @@ contract RouterV1 is IRouter, Owned, Multicall {
 
     function execute(IBorrower borrower, FlashloanInfo calldata flashloanInfo, SwapGroup[] calldata swapGroups)
         external
+        override
         onlyOwner
         returns (IERC20[] memory baseTokens, uint256[] memory profits)
     {
@@ -87,6 +88,7 @@ contract RouterV1 is IRouter, Owned, Multicall {
 
     function quoteExecute(IBorrower borrower, FlashloanInfo calldata flashloanInfo, SwapGroup[] calldata swapGroups)
         external
+        override
         onlyOwner
         returns (GroupResult[] memory results)
     {
