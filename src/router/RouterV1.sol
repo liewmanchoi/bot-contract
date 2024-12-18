@@ -33,7 +33,7 @@ contract RouterV1 is IRouter, Owned, Multicall {
         returns (address[] memory baseTokens, uint256[] memory profits)
     {
         // 确保没有重入
-        require(_borrower == address(0), "reentrancy guard");
+        require(_borrower == address(0), "ROUTER:REENTRY_ATTACK");
         // 设置borrower地址
         _borrower = address(borrower);
 
@@ -63,7 +63,7 @@ contract RouterV1 is IRouter, Owned, Multicall {
         profits = new uint256[](baseTokenLength);
         for (uint256 i = 0; i < baseTokenLength;) {
             uint256 balance = ERC20(baseTokens[i]).balanceOf(address(this));
-            require(balance >= balances[i], "NO_TOKEN_PROFIT");
+            require(balance >= balances[i], "ROUTER:NO_TOKEN_PROFIT");
 
             uint256 profit = balance - balances[i];
             profits[i] = profit;
@@ -82,7 +82,7 @@ contract RouterV1 is IRouter, Owned, Multicall {
         }
 
         // 确保有利润
-        require(isProfitable, "NO_OVERALL_PROFIT");
+        require(isProfitable, "ROUTER:NO_OVERALL_PROFIT");
     }
 
     function quoteExecute(IBorrower borrower, FlashloanInfo calldata flashloanInfo, SwapGroup[] calldata swapGroups)
@@ -107,7 +107,7 @@ contract RouterV1 is IRouter, Owned, Multicall {
     }
 
     function executeGroupsByBorrower(SwapGroup[] calldata swapGroups, bool is_quote) external {
-        require(msg.sender == _borrower, "ONLY_BORROWER");
+        require(msg.sender == _borrower, "ROUTER:ONLY_BY_BORROWER");
 
         uint256 swapGroupLength = swapGroups.length;
         GroupResult[] memory results = new GroupResult[](swapGroupLength);
@@ -181,7 +181,7 @@ contract RouterV1 is IRouter, Owned, Multicall {
      */
     function withdrawToken(ERC20 token) external onlyOwner {
         uint256 balance = token.balanceOf(address(this));
-        require(balance > 0, "NO_TOKEN_BALANCE");
+        require(balance > 0, "ROUTER:NO_TOKEN_BALANCE");
         token.safeTransfer(receiver, balance);
     }
 
@@ -190,7 +190,7 @@ contract RouterV1 is IRouter, Owned, Multicall {
      */
     function withdrawETH() external onlyOwner {
         uint256 balance = address(this).balance;
-        require(balance > 0, "NO_ETH_BALANCE");
+        require(balance > 0, "ROUTER:NO_ETH_BALANCE");
         SafeTransferLib.safeTransferETH(receiver, balance);
     }
 }

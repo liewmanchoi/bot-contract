@@ -12,26 +12,29 @@ contract UniswapV2Adapter is IAdapter {
         override
         returns (uint256 amountIn, uint256 amountOut)
     {
+        (uint256 reserve0, uint256 reserve1,) = IUniswapV2Pair(pool).getReserves();
+        require(reserve0 > 0 && reserve1 > 0, "UniswapV2Adapter:INSUFFICIENT_LIQUIDITY");
+        address token0 = IUniswapV2Pair(pool).token0();
+
+        bool isZeroForOne = fromToken == token0;
+        (uint256 reserveIn, uint256 reserveOut) = isZeroForOne ? (reserve0, reserve1) : (reserve1, reserve0);
+        amountIn = IERC20(fromToken).balanceOf(pool) - reserveIn;
+
         // 解码出fee
         uint256 fee = abi.decode(moreInfo, (uint256));
+        uint256 amountInWithFee = amountIn * (10000 - fee);
+        uint256 numerator = amountInWithFee * reserveOut;
+        uint256 denominator = reserveIn * 10000 + amountInWithFee;
+        uint256 quoteAmountOut = numerator / denominator;
 
-        address baseToken = IUniswapV2Pair(pool).token0();
-        (uint256 reserveIn, uint256 reserveOut,) = IUniswapV2Pair(pool).getReserves();
-        require(reserveIn > 0 && reserveOut > 0, "UniAdapter: INSUFFICIENT_LIQUIDITY");
+        // 发起调用
+        if (isZeroForOne) {
+            IUniswapV2Pair(pool).swap(0, quoteAmountOut, receiver, new bytes(0));
+        } else {
+            IUniswapV2Pair(pool).swap(quoteAmountOut, 0, receiver, new bytes(0));
+        }
 
-        uint256 balance0 = IERC20(baseToken).balanceOf(pool);
-        uint256 sellBaseAmount = balance0 - reserveIn;
-
-        uint256 sellBaseAmountWithFee = sellBaseAmount * 997;
-        uint256 numerator = sellBaseAmountWithFee * reserveOut;
-        uint256 denominator = reserveIn * 1000 + sellBaseAmountWithFee;
-        uint256 receiveQuoteAmount = numerator / denominator;
-        IUniswapV2Pair(pool).swap(0, receiveQuoteAmount, receiver, new bytes(0));
+        // 获取receiver实际接收到的数量
+        amountOut = IERC20(toToken).balanceOf(receiver);
     }
-
-    function getAmountOut(address pool, address fromToken, address toToken, uint256 amountIn, bytes calldata moreInfo)
-        external
-        override
-        returns (uint256 amountOut)
-    {}
 }
