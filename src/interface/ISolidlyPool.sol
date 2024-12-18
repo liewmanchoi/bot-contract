@@ -2,7 +2,7 @@
 pragma solidity ^0.8.28;
 pragma abicoder v2;
 
-interface ISolidly {
+interface ISolidlyPool {
     function getReserves() external view returns (uint256 _reserve0, uint256 _reserve1, uint256 _blockTimestampLast);
 
     function getAmountOut(uint256 amountIn, address tokenIn) external view returns (uint256);
