@@ -5,8 +5,8 @@ pragma abicoder v2;
 import {SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
 import {ERC20} from "solmate/tokens/ERC20.sol";
 import {IBorrower} from "../interface/IBorrower.sol";
-import {IFlashLoanRecipient, IERC20} from "@balancer-labs/v2-interfaces/contracts/vault/IFlashLoanRecipient.sol";
-import {IVault} from "@balancer-labs/v2-interfaces/contracts/vault/IVault.sol";
+import {IFlashLoanRecipient, IERC20} from "../interface/IFlashLoanRecipient.sol";
+import {IBalancerV2Vault} from "../interface/IBalancerV2Vault.sol";
 
 contract BalancerV2Borrower is IFlashLoanRecipient, IBorrower {
     using SafeTransferLib for ERC20;
@@ -29,7 +29,7 @@ contract BalancerV2Borrower is IFlashLoanRecipient, IBorrower {
                 ++i;
             }
         }
-        IVault(vault).flashLoan(this, _tokens, amounts, data);
+        IBalancerV2Vault(vault).flashLoan(this, _tokens, amounts, data);
     }
 
     function receiveFlashLoan(
