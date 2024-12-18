@@ -27,6 +27,7 @@ contract UniswapV2Adapter is IAdapter {
         uint256 denominator = reserveIn * 10000 + amountInWithFee;
         uint256 quoteAmountOut = numerator / denominator;
 
+        uint256 balanceBefore = IERC20(toToken).balanceOf(receiver);
         // 发起调用
         if (isZeroForOne) {
             IUniswapV2Pair(pool).swap(0, quoteAmountOut, receiver, new bytes(0));
@@ -35,6 +36,6 @@ contract UniswapV2Adapter is IAdapter {
         }
 
         // 获取receiver实际接收到的数量
-        amountOut = IERC20(toToken).balanceOf(receiver);
+        amountOut = IERC20(toToken).balanceOf(receiver) - balanceBefore;
     }
 }
