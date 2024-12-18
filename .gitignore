@@ -11,6 +11,8 @@ out/
 .env
 
 # Dependency directories
+lib/
+dependencies/
 node_modules/
 
 # Logs
