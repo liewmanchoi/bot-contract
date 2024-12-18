@@ -20,7 +20,7 @@ contract UniswapV2Adapter is IAdapter {
         (uint256 reserveIn, uint256 reserveOut) = isZeroForOne ? (reserve0, reserve1) : (reserve1, reserve0);
         amountIn = IERC20(fromToken).balanceOf(pool) - reserveIn;
 
-        // 解码出fee
+        // 解码出fee（百分比 * 10000）
         uint256 fee = abi.decode(moreInfo, (uint256));
         uint256 amountInWithFee = amountIn * (10000 - fee);
         uint256 numerator = amountInWithFee * reserveOut;
