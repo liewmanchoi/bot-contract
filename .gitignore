@@ -7,11 +7,36 @@ out/
 /broadcast/*/31337/
 /broadcast/**/dry-run/
 
-# Docs
-docs/
-
 # Dotenv file
 .env
 
 # Dependency directories
 node_modules/
+
+# Logs
+yarn-debug.log*
+yarn-error.log*
+
+# Dependency directories
+node_modules/
+
+# Yarn
+.yarn/*
+!.yarn/patches
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
+
+# Hardhat artifacts
+artifacts/
+cache/
+
+# Build artifacts
+dist/
+pkg/balancer-js/src/typechain/*
+
+# Forge
+forge-artifacts/
+forge-cache/
