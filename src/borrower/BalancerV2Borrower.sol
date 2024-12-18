@@ -42,9 +42,7 @@ contract BalancerV2Borrower is IFlashLoanRecipient, IBorrower {
         require(msg.sender == vault, "NOT_VAULT");
 
         // 调用router业务逻辑
-        address router;
-        bytes memory data;
-        (router, data) = abi.decode(userData, (address, bytes));
+        (address router, bytes memory data) = abi.decode(userData, (address, bytes));
 
         // 调用router
         (bool success,) = address(router).call(data);

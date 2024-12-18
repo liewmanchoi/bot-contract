@@ -14,6 +14,7 @@ optimizer_runs = 9999
 forge-std = "1.9.4"
 solmate = "6.8.0"
 "@openzeppelin-contracts" = "5.2.0-rc.0"
+"@uniswap-v2-core" = "1.0.1"
 
 [profile.config.ftm]
 single_line_statement_blocks = 'multi'

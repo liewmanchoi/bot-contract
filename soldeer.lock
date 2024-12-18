@@ -6,6 +6,13 @@ checksum = "d5a7c882c7633c9d46a221d62b9cc45752c1c314c14c99335f7f85d0f82d1349"
 integrity = "93381cfcb698f3a6204dbc07e75cc70482296442cdd552cd05bcce7b56565c87"
 
 [[dependencies]]
+name = "@uniswap-v2-core"
+version = "1.0.1"
+url = "https://soldeer-revisions.s3.amazonaws.com/@uniswap-v2-core/1_0_1_22-01-2024_13:18:30_v2-core.zip"
+checksum = "efebb89237048771c19f52d3ce87ec4d0c591279bf1977c49f9e70e5fff530f0"
+integrity = "fda4e18a2a0c21eeddd8b6af36439f394e4ff74eb75705409a87b8952c9e2972"
+
+[[dependencies]]
 name = "forge-std"
 version = "1.9.4"
 url = "https://soldeer-revisions.s3.amazonaws.com/forge-std/1_9_4_25-10-2024_14:36:59_forge-std-1.9.zip"
