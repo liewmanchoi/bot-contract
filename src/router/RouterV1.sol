@@ -13,7 +13,6 @@ import {Swap} from "../interface/IRouter.sol";
 import {GroupResult} from "../interface/IRouter.sol";
 import {IBorrower} from "../interface/IBorrower.sol";
 import {IAdapter} from "../interface/IAdapter.sol";
-import {IERC20} from "@openzeppelin/token/ERC20/IERC20.sol";
 
 // todo: 所有接口都需要加上任意字符串，防止abi泄露
 contract RouterV1 is IRouter, Owned, Multicall {
@@ -31,7 +30,7 @@ contract RouterV1 is IRouter, Owned, Multicall {
         external
         override
         onlyOwner
-        returns (IERC20[] memory baseTokens, uint256[] memory profits)
+        returns (address[] memory baseTokens, uint256[] memory profits)
     {
         // 确保没有重入
         require(_borrower == address(0), "reentrancy guard");
@@ -43,7 +42,7 @@ contract RouterV1 is IRouter, Owned, Multicall {
         uint256[] memory balances = new uint256[](baseTokenLength);
 
         for (uint256 i = 0; i < baseTokenLength;) {
-            balances[i] = baseTokens[i].balanceOf(address(this));
+            balances[i] = ERC20(baseTokens[i]).balanceOf(address(this));
             unchecked {
                 ++i;
             }
@@ -63,7 +62,7 @@ contract RouterV1 is IRouter, Owned, Multicall {
         bool isProfitable = false;
         profits = new uint256[](baseTokenLength);
         for (uint256 i = 0; i < baseTokenLength;) {
-            uint256 balance = baseTokens[i].balanceOf(address(this));
+            uint256 balance = ERC20(baseTokens[i]).balanceOf(address(this));
             require(balance >= balances[i], "NO_TOKEN_PROFIT");
 
             uint256 profit = balance - balances[i];
@@ -164,7 +163,7 @@ contract RouterV1 is IRouter, Owned, Multicall {
             }
         }
 
-        uint256 baseTokenAmount = swapGroup.baseToken.balanceOf(address(this));
+        uint256 baseTokenAmount = ERC20(swapGroup.baseToken).balanceOf(address(this));
         result.profit = int256(baseTokenAmount) - int256(swapGroup.initialAmount);
         result.swapResults = swapResults;
 

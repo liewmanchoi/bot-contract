@@ -2,7 +2,6 @@
 pragma solidity ^0.8.28;
 pragma abicoder v2;
 
-import {IERC20} from "@openzeppelin/token/ERC20/IERC20.sol";
 import {IAdapter} from "./IAdapter.sol";
 import {IBorrower} from "./IBorrower.sol";
 
@@ -15,12 +14,12 @@ struct Swap {
 }
 
 struct FlashloanInfo {
-    IERC20[] tokens;
+    address[] tokens;
     uint256[] amounts;
 }
 
 struct SwapGroup {
-    IERC20 baseToken;
+    address baseToken;
     uint256 initialAmount;
     IAdapter[] adapters;
     Swap[] swaps;
@@ -35,7 +34,7 @@ struct GroupResult {
 interface IRouter {
     function execute(IBorrower borrower, FlashloanInfo calldata flashloanInfo, SwapGroup[] calldata swapGroups)
         external
-        returns (IERC20[] memory baseTokens, uint256[] memory profits);
+        returns (address[] memory baseTokens, uint256[] memory profits);
 
     function quoteExecute(IBorrower borrower, FlashloanInfo calldata flashloanInfo, SwapGroup[] calldata swapGroups)
         external
