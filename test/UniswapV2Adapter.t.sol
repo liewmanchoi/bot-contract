@@ -24,7 +24,7 @@ contract UniswapV2AdapterTest is Test {
         vm.createSelectFork(BASE_RPC_URL, 23912468);
     }
 
-    function test_Swap1() public {
+    function test_Swap() public {
         // todo: fuzz test
 
         // Transfer funds to the pool
@@ -39,6 +39,19 @@ contract UniswapV2AdapterTest is Test {
         assertEq(amountIn, 110e18);
         assertEq(amountOut, IERC20(toToken).balanceOf(receiver) - initialReceiverBalance);
         console2.log(amountIn, amountOut);
+    }
+
+    function testFuzz_Swap(uint256 amount) external {
+        vm.assume((amount < 10000e18) && (amount > 1e10));
+        // Transfer funds to the pool
+        deal(fromToken, address(this), amount);
+        IERC20(fromToken).transfer(address(pool), amount);
+        uint256 initialReceiverBalance = IERC20(toToken).balanceOf(receiver);
+
+        (uint256 amountIn, uint256 amountOut) = adapter.swap(receiver, address(pool), fromToken, toToken, moreInfo);
+
+        assertEq(amountIn, amount);
+        assertEq(amountOut, IERC20(toToken).balanceOf(receiver) - initialReceiverBalance);
     }
 
     function test_SwapInsufficientLiquidity() public {
