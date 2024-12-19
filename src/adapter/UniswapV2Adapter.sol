@@ -27,7 +27,9 @@ contract UniswapV2Adapter is IAdapter {
         uint256 denominator = reserveIn * 10000 + amountInWithFee;
         uint256 quoteAmountOut = numerator / denominator;
 
-        require(quoteAmountOut > 0, "UniswapV2Adapter:ZERO_AMOUNT_OUT");
+        if (quoteAmountOut == 0) {
+            return (amountIn, 0);
+        }
 
         uint256 balanceBefore = IERC20(toToken).balanceOf(receiver);
         // 发起调用

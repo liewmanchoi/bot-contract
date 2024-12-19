@@ -42,7 +42,7 @@ contract UniswapV2AdapterTest is Test {
     }
 
     function testFuzz_Swap(uint256 amount) external {
-        vm.assume((amount < 10000e18) && (amount > 1e10));
+        vm.assume(amount < 10000e18);
         // Transfer funds to the pool
         deal(fromToken, address(this), amount);
         IERC20(fromToken).transfer(address(pool), amount);
