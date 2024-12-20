@@ -41,6 +41,8 @@ jobs:
         id: build
 
       - name: Run Forge tests
+        env:
+          BASE_RPC_URL: ${{ vars.BASE_RPC_URL }}
         run: |
           forge test -vvv
         id: test
