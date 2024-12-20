@@ -22,7 +22,7 @@ contract RouterV1 is IRouter, Owned, Multicall {
     address private receiver;
     address private _borrower = address(0);
 
-    constructor(address _owner, address _receiver) Owned(_owner) {
+    constructor(address _receiver) Owned(msg.sender) {
         receiver = _receiver;
     }
 
