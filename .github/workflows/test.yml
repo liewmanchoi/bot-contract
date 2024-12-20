@@ -15,8 +15,7 @@ jobs:
 
     name: Foundry project
     runs-on: ubuntu-latest
-    env:
-      BASE_RPC_URL: ${{ vars.BASE_RPC_URL }}
+    environment: env
     steps:
       - uses: actions/checkout@v4
         with:
