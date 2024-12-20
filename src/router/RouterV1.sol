@@ -26,6 +26,17 @@ contract RouterV1 is IRouter, Owned, Multicall {
         receiver = _receiver;
     }
 
+    function multicall(bytes[] calldata data)
+        external
+        virtual
+        override(Multicall)
+        onlyOwner
+        returns (bytes[] memory results)
+    {
+        // 调用父合约中的 multicall 实现
+        return this.multicall(data);
+    }
+
     function execute(IBorrower borrower, FlashloanInfo calldata flashloanInfo, SwapGroup[] calldata swapGroups)
         external
         override
