@@ -21,6 +21,10 @@ contract SolidlyAdapter is IAdapter {
         amountIn = IERC20(fromToken).balanceOf(pool) - reserveIn;
         uint256 quoteAmountOut = ISolidlyPool(pool).getAmountOut(amountIn, fromToken);
 
+        if (quoteAmountOut == 0) {
+            return (amountIn, 0);
+        }
+
         uint256 balanceBefore = IERC20(toToken).balanceOf(receiver);
         // 发起调用
         if (isZeroForOne) {
