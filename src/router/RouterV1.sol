@@ -137,11 +137,10 @@ contract RouterV1 is IRouter, Owned, Multicall {
         }
     }
 
-    function executeGroup(SwapGroup calldata swapGroup, bool is_quote)
-        external
-        onlyOwner
-        returns (GroupResult memory result)
-    {
+    function executeGroup(SwapGroup calldata swapGroup, bool is_quote) external returns (GroupResult memory result) {
+        // 仅允许this调用
+        require(msg.sender == address(this), "ROUTER:ONLY_BY_ROUTER");
+
         uint256 swapLength = swapGroup.swaps.length;
         uint256[2][] memory swapResults = new uint256[2][](swapLength);
 
