@@ -21,6 +21,9 @@ contract UniswapV3Adapter is IAdapter, IUniswapV3SwapCallback {
 
         // token要提前转到adapter合约，而不是pool中
         amountIn = ERC20(fromToken).balanceOf(address(this));
+        if (amountIn == 0) {
+            return (0, 0);
+        }
 
         uint160 sqrtPriceLimitX96;
         if (isZeroForOne) {
