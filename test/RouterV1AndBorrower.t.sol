@@ -51,33 +51,59 @@ contract OverallTest is Test {
 
         IAdapter[] memory adapters = new IAdapter[](2);
         adapters[0] = uniswapV2Adapter;
-        adapters[1] = uniswapV3Adapter;
+        adapters[1] = uniswapV2Adapter;
 
-        Swap[] memory swaps = new Swap[](2);
-        swaps[0] = Swap({
+        Swap[] memory swaps1 = new Swap[](2);
+        swaps1[0] = Swap({
             receiver: 0x01204Ea51961591236000cc709Cd79dB16069369,
             pool: 0xe7Cc983d87777b51137e6cf88D7a054dA0c9dB76,
             fromToken: 0x4200000000000000000000000000000000000006,
             toToken: 0xEB319ea07cA67a9D96d57DE91503F85E4fe386B3,
             moreInfo: hex"000000000000000000000000000000000000000000000000000000000000001e"
         });
-        swaps[1] = Swap({
-            receiver: 0x006362D43e228A8F7e0EA527455DEe7e2755567a,
+        swaps1[1] = Swap({
+            receiver: address(balancerV2Borrower),
             pool: 0x01204Ea51961591236000cc709Cd79dB16069369,
             fromToken: 0xEB319ea07cA67a9D96d57DE91503F85E4fe386B3,
             toToken: 0x4200000000000000000000000000000000000006,
             moreInfo: hex"000000000000000000000000000000000000000000000000000000000000001e"
         });
 
-        SwapGroup memory swapGroup = SwapGroup({
+        SwapGroup memory swapGroup1 = SwapGroup({
             baseToken: 0x4200000000000000000000000000000000000006,
             initialAmount: 63512644790154384,
             fundReceiver: 0xe7Cc983d87777b51137e6cf88D7a054dA0c9dB76,
             adapters: adapters,
-            swaps: swaps
+            swaps: swaps1
         });
-        SwapGroup[] memory swapGroups = new SwapGroup[](1);
-        swapGroups[0] = swapGroup;
+
+        Swap[] memory swaps2 = new Swap[](2);
+        swaps2[0] = Swap({
+            receiver: 0x22584e946e51e41D8A0002111b1bd9d5d8406cE9,
+            pool: 0x115621A7C92e589aE689A2b23fa38EaA75C64BDc,
+            fromToken: 0x4200000000000000000000000000000000000006,
+            toToken: 0x39353a32ECeafE4979a8606512C046C3B6398CC4,
+            moreInfo: hex"000000000000000000000000000000000000000000000000000000000000001e"
+        });
+        swaps2[1] = Swap({
+            receiver: address(balancerV2Borrower),
+            pool: 0x22584e946e51e41D8A0002111b1bd9d5d8406cE9,
+            fromToken: 0x39353a32ECeafE4979a8606512C046C3B6398CC4,
+            toToken: 0x4200000000000000000000000000000000000006,
+            moreInfo: hex"000000000000000000000000000000000000000000000000000000000000001e"
+        });
+
+        SwapGroup memory swapGroup2 = SwapGroup({
+            baseToken: 0x4200000000000000000000000000000000000006,
+            initialAmount: 35948558219609156,
+            fundReceiver: 0x115621A7C92e589aE689A2b23fa38EaA75C64BDc,
+            adapters: adapters,
+            swaps: swaps2
+        });
+
+        SwapGroup[] memory swapGroups = new SwapGroup[](2);
+        swapGroups[0] = swapGroup1;
+        swapGroups[1] = swapGroup2;
 
         (address[] memory baseTokens, uint256[] memory profits) = routerV1.execute({
             borrower: balancerV2Borrower,
@@ -99,7 +125,7 @@ contract OverallTest is Test {
 
         IAdapter[] memory adapters = new IAdapter[](2);
         adapters[0] = uniswapV2Adapter;
-        adapters[1] = uniswapV3Adapter;
+        adapters[1] = uniswapV2Adapter;
 
         Swap[] memory swaps = new Swap[](2);
         swaps[0] = Swap({

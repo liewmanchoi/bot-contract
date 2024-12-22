@@ -160,8 +160,11 @@ contract RouterV1 is IRouter, Owned, Multicall {
         uint256 swapLength = swapGroup.swaps.length;
         uint256[2][] memory swapResults = new uint256[2][](swapLength);
 
+        // 资金的起点和终点都是borrower，交易前后borrower的资金必须增加
+        ERC20 baseToken = ERC20(swapGroup.baseToken);
+        uint256 beforeSwapBalance = baseToken.balanceOf(borrower);
         // 初始资金转移给fundReceiver
-        ERC20(swapGroup.baseToken).safeTransferFrom(borrower, swapGroup.fundReceiver, swapGroup.initialAmount);
+        baseToken.safeTransferFrom(borrower, swapGroup.fundReceiver, swapGroup.initialAmount);
 
         // 依次执行swap操作
         for (uint256 i = 0; i < swapLength;) {
@@ -182,13 +185,13 @@ contract RouterV1 is IRouter, Owned, Multicall {
             }
         }
 
-        uint256 baseTokenAmount = ERC20(swapGroup.baseToken).balanceOf(address(this));
-        result.profit = int256(baseTokenAmount) - int256(swapGroup.initialAmount);
+        uint256 afterSwapBalance = baseToken.balanceOf(borrower);
+        result.profit = int256(afterSwapBalance) - int256(beforeSwapBalance);
         result.swapResults = swapResults;
 
         if (!is_quote) {
             // 非查询，必须保证有利润
-            require(result.profit > 0);
+            require(result.profit > 0, "ROUTER:LOOP_UNPROFITABLE");
         }
     }
 
