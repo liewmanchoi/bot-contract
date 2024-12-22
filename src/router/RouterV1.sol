@@ -53,14 +53,14 @@ contract RouterV1 is IRouter, Owned, Multicall {
         uint256[] memory balances = new uint256[](baseTokenLength);
 
         for (uint256 i = 0; i < baseTokenLength;) {
-            balances[i] = ERC20(baseTokens[i]).balanceOf(address(this));
+            balances[i] = ERC20(baseTokens[i]).balanceOf(receiver);
             unchecked {
                 ++i;
             }
         }
 
         // 发起闪电贷，传入套利逻辑
-        bytes memory data = abi.encode(address(this), swapGroups, false);
+        bytes memory data = abi.encode(receiver, address(this), swapGroups, false);
 
         borrower.makeFlashloan(flashloanInfo.tokens, flashloanInfo.amounts, data);
 
@@ -71,7 +71,7 @@ contract RouterV1 is IRouter, Owned, Multicall {
         bool isProfitable = false;
         profits = new uint256[](baseTokenLength);
         for (uint256 i = 0; i < baseTokenLength;) {
-            uint256 balance = ERC20(baseTokens[i]).balanceOf(address(this));
+            uint256 balance = ERC20(baseTokens[i]).balanceOf(receiver);
             require(balance >= balances[i], "ROUTER:TOKEN_LOSS");
 
             uint256 profit = balance - balances[i];
@@ -80,9 +80,6 @@ contract RouterV1 is IRouter, Owned, Multicall {
                 if (!isProfitable) {
                     isProfitable = true;
                 }
-
-                // 转钱到receiver
-                ERC20(address(baseTokens[i])).safeTransfer(receiver, profit);
             }
 
             unchecked {
@@ -100,11 +97,16 @@ contract RouterV1 is IRouter, Owned, Multicall {
         onlyOwner
         returns (GroupResult[] memory results)
     {
+        // 确保没有重入攻击
+        require(_borrower == address(0), "ROUTER:REENTRY_ATTACK");
+        // 设置borrower地址
         _borrower = address(borrower);
+
         // 进行闪电贷，在还款之前主动revert，获取结果
-        bytes memory data = abi.encode(address(this), swapGroups, true);
+        bytes memory data = abi.encode(receiver, address(this), swapGroups, true);
         try borrower.makeFlashloan(flashloanInfo.tokens, flashloanInfo.amounts, data) {}
         catch (bytes memory reason) {
+            _borrower = address(0);
             // parse revert reason
             return parseRevertReason(reason);
         }

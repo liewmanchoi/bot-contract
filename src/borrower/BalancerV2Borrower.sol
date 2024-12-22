@@ -43,8 +43,8 @@ contract BalancerV2Borrower is IFlashLoanRecipient, IBorrower {
         require(msg.sender == vault, "NOT_VAULT");
 
         // 调用router业务逻辑
-        (address router, SwapGroup[] memory swapGroups, bool is_quote) =
-            abi.decode(userData, (address, SwapGroup[], bool));
+        (address receiver, address router, SwapGroup[] memory swapGroups, bool is_quote) =
+            abi.decode(userData, (address, address, SwapGroup[], bool));
 
         // 将闪电贷的资金授权给router使用
         for (uint256 i = 0; i < tokens.length;) {
@@ -65,10 +65,10 @@ contract BalancerV2Borrower is IFlashLoanRecipient, IBorrower {
             // 主动向vault还款
             token.transfer(vault, repayAmount);
 
-            // 将剩余款项转回router
+            // 将剩余款项转回receiver
             uint256 balance = token.balanceOf(address(this));
             if (balance > 0) {
-                ERC20(address(token)).safeTransfer(router, balance);
+                ERC20(address(token)).safeTransfer(receiver, balance);
             }
 
             unchecked {
