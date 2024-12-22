@@ -21,7 +21,7 @@ solmate = "6.8.0"
 single_line_statement_blocks = 'multi'
 
 [fuzz]
-runs = 256
-show_logs = true
+seed = '0x1314520'
 
-# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
+# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-optionsruns = 256
+show_logs = true

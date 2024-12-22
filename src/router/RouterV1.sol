@@ -161,7 +161,9 @@ contract RouterV1 is IRouter, Owned, Multicall {
             // 依次执行swap操作
             (uint256 amountIn, uint256 amountOut) =
                 adapter.swap(swap.receiver, swap.pool, swap.fromToken, swap.toToken, swap.moreInfo);
-            swapResults[i] = [amountIn, amountOut];
+            swapResults[i][0] = amountIn;
+            swapResults[i][1] = amountOut;
+
             if (amountOut == 0) {
                 // 提前中断无效swap
                 break;
