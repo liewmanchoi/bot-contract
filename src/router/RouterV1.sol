@@ -43,7 +43,7 @@ contract RouterV1 is IRouter, Owned, Multicall {
         onlyOwner
         returns (address[] memory baseTokens, uint256[] memory profits)
     {
-        // 确保没有重入
+        // 确保没有重入攻击
         require(_borrower == address(0), "ROUTER:REENTRY_ATTACK");
         // 设置borrower地址
         _borrower = address(borrower);
@@ -60,9 +60,7 @@ contract RouterV1 is IRouter, Owned, Multicall {
         }
 
         // 发起闪电贷，传入套利逻辑
-        bytes memory data = abi.encode(
-            address(this), abi.encodePacked(this.executeGroupsByBorrower.selector, abi.encode(swapGroups, false))
-        );
+        bytes memory data = abi.encode(address(this), swapGroups, false);
 
         borrower.makeFlashloan(flashloanInfo.tokens, flashloanInfo.amounts, data);
 
@@ -74,7 +72,7 @@ contract RouterV1 is IRouter, Owned, Multicall {
         profits = new uint256[](baseTokenLength);
         for (uint256 i = 0; i < baseTokenLength;) {
             uint256 balance = ERC20(baseTokens[i]).balanceOf(address(this));
-            require(balance >= balances[i], "ROUTER:NO_TOKEN_PROFIT");
+            require(balance >= balances[i], "ROUTER:TOKEN_LOSS");
 
             uint256 profit = balance - balances[i];
             profits[i] = profit;
@@ -93,7 +91,7 @@ contract RouterV1 is IRouter, Owned, Multicall {
         }
 
         // 确保有利润
-        require(isProfitable, "ROUTER:NO_OVERALL_PROFIT");
+        require(isProfitable, "ROUTER:TX_UNPROFITABLE");
     }
 
     function quoteExecute(IBorrower borrower, FlashloanInfo calldata flashloanInfo, SwapGroup[] calldata swapGroups)
@@ -102,10 +100,9 @@ contract RouterV1 is IRouter, Owned, Multicall {
         onlyOwner
         returns (GroupResult[] memory results)
     {
+        _borrower = address(borrower);
         // 进行闪电贷，在还款之前主动revert，获取结果
-        bytes memory data = abi.encode(
-            address(this), abi.encodePacked(this.executeGroupsByBorrower.selector, abi.encode(swapGroups, true))
-        );
+        bytes memory data = abi.encode(address(this), swapGroups, true);
         try borrower.makeFlashloan(flashloanInfo.tokens, flashloanInfo.amounts, data) {}
         catch (bytes memory reason) {
             // parse revert reason
@@ -126,9 +123,13 @@ contract RouterV1 is IRouter, Owned, Multicall {
         for (uint256 i = 0; i < swapGroupLength;) {
             SwapGroup calldata swapGroup = swapGroups[i];
             // 使用try-catch机制将无效的swapGroup回滚（防止亏钱）
-            try this.executeGroup({swapGroup: swapGroup, is_quote: is_quote}) returns (GroupResult memory result) {
+            try this.executeGroup({borrower: _borrower, swapGroup: swapGroup, is_quote: is_quote}) returns (
+                GroupResult memory result
+            ) {
                 results[i] = result;
-            } catch {}
+            } catch {
+                results[i] = GroupResult(0, new uint256[2][](swapGroup.swaps.length));
+            }
 
             unchecked {
                 ++i;
@@ -138,27 +139,32 @@ contract RouterV1 is IRouter, Owned, Multicall {
         if (is_quote) {
             // 故意revert，返回结果
             bytes memory encodedData = abi.encode(results);
-
-            // 使用内联汇编返回编码后的复杂结构
             assembly {
-                let ptr := add(encodedData, 0x20) // 跳过长度字段，指向实际数据
-                let size := mload(encodedData) // 获取编码数据的大小
-                revert(ptr, size) // 通过 revert 返回完整的编码数据
+                let ptr := mload(0x40) // 当前空闲内存位置
+                let length := mload(encodedData) // 获取 bytes 长度
+                mstore(ptr, length) // 写入长度
+                revert(add(encodedData, 32), length) // 跳过长度部分，只抛出实际数据
             }
         }
     }
 
-    function executeGroup(SwapGroup calldata swapGroup, bool is_quote) external returns (GroupResult memory result) {
+    function executeGroup(address borrower, SwapGroup calldata swapGroup, bool is_quote)
+        external
+        returns (GroupResult memory result)
+    {
         // 仅允许this调用
-        require(msg.sender == address(this), "ROUTER:ONLY_BY_ROUTER");
+        require(msg.sender == address(this), "ROUTER:ONLY_ROUTER");
 
         uint256 swapLength = swapGroup.swaps.length;
         uint256[2][] memory swapResults = new uint256[2][](swapLength);
 
+        // 初始资金转移给fundReceiver
+        ERC20(swapGroup.baseToken).safeTransferFrom(borrower, swapGroup.fundReceiver, swapGroup.initialAmount);
+
+        // 依次执行swap操作
         for (uint256 i = 0; i < swapLength;) {
             Swap calldata swap = swapGroup.swaps[i];
             IAdapter adapter = swapGroup.adapters[i];
-            // 依次执行swap操作
             (uint256 amountIn, uint256 amountOut) =
                 adapter.swap(swap.receiver, swap.pool, swap.fromToken, swap.toToken, swap.moreInfo);
             swapResults[i][0] = amountIn;
@@ -193,7 +199,7 @@ contract RouterV1 is IRouter, Owned, Multicall {
      */
     function withdrawToken(ERC20 token) external onlyOwner {
         uint256 balance = token.balanceOf(address(this));
-        require(balance > 0, "ROUTER:NO_TOKEN_BALANCE");
+        require(balance > 0, "ROUTER:NO_TOKEN");
         token.safeTransfer(receiver, balance);
     }
 
@@ -202,7 +208,7 @@ contract RouterV1 is IRouter, Owned, Multicall {
      */
     function withdrawETH() external onlyOwner {
         uint256 balance = address(this).balance;
-        require(balance > 0, "ROUTER:NO_ETH_BALANCE");
+        require(balance > 0, "ROUTER:NO_ETH");
         SafeTransferLib.safeTransferETH(receiver, balance);
     }
 }

@@ -21,6 +21,8 @@ struct FlashloanInfo {
 struct SwapGroup {
     address baseToken;
     uint256 initialAmount;
+    // 闪电贷资金接收者
+    address fundReceiver;
     IAdapter[] adapters;
     Swap[] swaps;
 }

@@ -5,6 +5,7 @@ pragma abicoder v2;
 import {SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
 import {ERC20} from "solmate/tokens/ERC20.sol";
 import {IBorrower} from "../interface/IBorrower.sol";
+import {IRouter, SwapGroup} from "../interface/IRouter.sol";
 import {IFlashLoanRecipient, IERC20} from "../interface/IFlashLoanRecipient.sol";
 import {IBalancerV2Vault} from "../interface/IBalancerV2Vault.sol";
 
@@ -42,11 +43,20 @@ contract BalancerV2Borrower is IFlashLoanRecipient, IBorrower {
         require(msg.sender == vault, "NOT_VAULT");
 
         // 调用router业务逻辑
-        (address router, bytes memory data) = abi.decode(userData, (address, bytes));
+        (address router, SwapGroup[] memory swapGroups, bool is_quote) =
+            abi.decode(userData, (address, SwapGroup[], bool));
 
+        // 将闪电贷的资金授权给router使用
+        for (uint256 i = 0; i < tokens.length;) {
+            IERC20 token = tokens[i];
+            token.approve(router, amounts[i]);
+
+            unchecked {
+                ++i;
+            }
+        }
         // 调用router
-        (bool success,) = address(router).call(data);
-        require(success, "ROUTER_CALL_FAILED");
+        IRouter(router).executeGroupsByBorrower({swapGroups: swapGroups, is_quote: is_quote});
 
         uint256 length = tokens.length;
         for (uint256 i = 0; i < length;) {
