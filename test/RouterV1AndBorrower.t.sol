@@ -25,6 +25,7 @@ contract OverallTest is Test {
     function setUp() external {
         string memory BASE_RPC_URL = vm.envString("BASE_RPC_URL");
         vm.createSelectFork(BASE_RPC_URL, 24028115);
+        vm.warp(block.timestamp + 1);
 
         // 部署合约
         uniswapV2Adapter = new UniswapV2Adapter();
