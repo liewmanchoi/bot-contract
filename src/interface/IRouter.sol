@@ -40,7 +40,7 @@ interface IRouter {
 
     function quoteExecute(IBorrower borrower, FlashloanInfo calldata flashloanInfo, SwapGroup[] calldata swapGroups)
         external
-        returns (GroupResult[] memory results);
+        returns (uint256 gasEstimate, GroupResult[] memory results);
 
     function executeGroupsByBorrower(SwapGroup[] calldata swapGroups, bool is_quote) external;
 }

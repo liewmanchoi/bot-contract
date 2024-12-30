@@ -155,11 +155,12 @@ contract OverallTest is Test {
         SwapGroup[] memory swapGroups = new SwapGroup[](1);
         swapGroups[0] = swapGroup1;
 
-        GroupResult[] memory results = routerV1.quoteExecute({
+        (uint256 gasEstimate, GroupResult[] memory results) = routerV1.quoteExecute({
             borrower: balancerV2Borrower,
             flashloanInfo: FlashloanInfo({tokens: tokens, amounts: amounts}),
             swapGroups: swapGroups
         });
+        console2.log("gasEstimate", gasEstimate);
         console2.log("results.length:", results.length);
         for (uint256 i = 0; i < results.length; i++) {
             console2.log("profit", results[i].profit);

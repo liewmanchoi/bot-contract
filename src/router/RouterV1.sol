@@ -95,8 +95,10 @@ contract RouterV1 is IRouter, Owned, Multicall {
         external
         override
         onlyOwner
-        returns (GroupResult[] memory results)
+        returns (uint256 gasEstimate, GroupResult[] memory results)
     {
+        uint256 gasBefore = gasleft();
+
         // 确保没有重入攻击
         require(_borrower == address(0), "ROUTER:REENTRY_ATTACK");
         // 设置borrower地址
@@ -107,8 +109,10 @@ contract RouterV1 is IRouter, Owned, Multicall {
         try borrower.makeFlashloan(flashloanInfo.tokens, flashloanInfo.amounts, data) {}
         catch (bytes memory reason) {
             _borrower = address(0);
+
+            gasEstimate = gasBefore - gasleft();
             // parse revert reason
-            return parseRevertReason(reason);
+            return (gasEstimate, parseRevertReason(reason));
         }
     }
 
