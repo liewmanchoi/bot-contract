@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.28;
 
+import {stdError} from "forge-std/StdError.sol";
 import {Test} from "forge-std/Test.sol";
 import {console2} from "forge-std/console2.sol";
 import {FlashloanInfo} from "../src/interface/IRouter.sol";
@@ -49,7 +50,8 @@ contract OverallTest is Test {
         console2.log("routerV1", address(routerV1));
     }
 
-    function test_execute() external {
+    function test_Revert_execute() external {
+        vm.expectRevert("ROUTER:TX_UNPROFITABLE");
         address[] memory tokens = new address[](1);
         tokens[0] = 0x4200000000000000000000000000000000000006;
         uint256[] memory amounts = new uint256[](1);

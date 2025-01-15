@@ -94,7 +94,6 @@ contract RouterV1 is IRouter, Owned, Multicall {
     function quoteExecute(IBorrower borrower, FlashloanInfo calldata flashloanInfo, SwapGroup[] calldata swapGroups)
         external
         override
-        onlyOwner
         returns (uint256 gasEstimate, GroupResult[] memory results)
     {
         uint256 gasBefore = gasleft();
